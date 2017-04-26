@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+
+        var messages = [];
+        var usr, pwd;
+
+        function renderMessages() {
+            var str = "";
+            for(var i=0;i<messages.length;i++){
+                str += messages[i].sender +": " + messages[i].content + "<br/>";
+            }
+            $("#divMessages").html(str);
+            $("#divMessages").scrollTop();
+        }
+
+        function getMessages() {
+            $.get("MainServlet?action=check&username="+usr+"&password="+pwd+"&from="+messages.length, function (data, status) {
+                if(status == "success"){
+                    if(data.length > 0){
+                        var newMessages = data.split("&");
+                        for(var i=0;i<newMessages.length;i++) {
+                            var msg = newMessages[i].split("|");
+                            if(msg.length != 2)
+                                continue;
+                            var newMessage = new Object();
+                            newMessage.sender = msg[0];
+                            newMessage.content = decodeURIComponent(msg[1]);
+                            messages.push(newMessage);
+                        }
+                        renderMessages();
+                    }
+                }
+                setTimeout(function () {
+                    getMessages();
+                }, 200);
+            });
+
+        }
+
+
+
+        function init() {
+
+        }
+
+
+
+        function btnSend() {
+            var msg = $("#txtMessage").val();
+            //TODO: disable the button
+            if(msg.length == 0)
+                return;
+            msg = encodeURIComponent(msg);
+            $.get("MainServlet?action=send&username="+usr+"&password="+pwd+"&message=" + msg, function (data, status) {
+                //TODO: enable the button
+                if(status=="success"){
+                    if(data == "ok"){
+                        $("#txtMessage").val("");
+                        $("#lblResult").val("send");
+                    }else{
+                        $("#lblResult").val("error");
+                    }
+                }else{
+                    $("#lblResult").val("error");
+                }
+            });
+        }
+        function txtMessageKeyDown(event) {
+            if(event.keyCode == 13) { //enter
+                btnSend();
+            }
+        }
+
+        function btnSignupLogin(isSignup) {
+            var username = $("#txtUserName").val();
+            var password = $("#txtPassword").val();
+            if(username.length < 2 || password.length < 2){
+                $("#lblLoginResult").html('<font style="color: red;">username and password must be at least 2 characters long each</font>');
+                return;
+            }
+            $("#lblLoginResult").html("please wait...");
+            $.get("MainServlet?action="+(isSignup ? "signup" : "login")+"&username="+username+"&password="+password,function (data, status) {
+                if(status == "success") {
+                    if(data == "ok") {
+                        $("#divLoginPage").hide();
+                        $("#divMessagesPage").show();
+                        $("#lblLoginResult").html("success");
+                        usr = username;
+                        pwd = password;
+                        getMessages();
+                    }else{
+                        var errorMessage = isSignup ? "username already taken" : "username or password are incorrect";
+                        $("#lblLoginResult").html('<font style="color: red;">'+errorMessage+'</font>');
+                    }
+                }
+            });
+        }
+
+
+    </script>
+</head>
+<body onload="init()">
+<h2 style="text-align: center">Chat Room</h2>
+<div id="divLoginPage" style="width: 30%; margin: auto;height: 300px;">
+    please enter your username and password:
+    <br/>
+    <input type="text" id="txtUserName" placeholder="username" style="width: 100%;"/>
+    <br/>
+    <input type="password" id="txtPassword" placeholder="password" style="width: 100%;" />
+    <br/>
+    <button style="width: 48%; height: 30px" onclick="btnSignupLogin(true)">Signup</button>
+    &nbsp;
+    <button style="width: 48%; height: 30px" onclick="btnSignupLogin(false)">Login</button>
+    <br/>
+    <span id="lblLoginResult"></span>
+</div>
+<div id="divMessagesPage" style="display: none;">
+    <div id="divMessages" style="width: 60%;margin:auto;background-color: aquamarine;height: 300px;overflow-y: scroll;"></div>
+    <div style="width: 60%;margin: auto;">
+        <input type="text" id="txtMessage" style="width: 70%;" onkeydown="txtMessageKeyDown(event)">
+        <button id="btnSend" onclick="btnSend()" style="width:28%;">Send</button>
+    </div>
+</div>
+</body>
+</html>

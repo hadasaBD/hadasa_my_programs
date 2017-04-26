@@ -1,0 +1,80 @@
+המחלקה DecryptionThread
+לתת שמות משמעותיים למשתנים, המשתנה map הוא אוסף מילים
+השדה text מאותחל סתם בשורה 13
+שורה 15 עדיף להשתמש בint
+הפונקציה decrypt
+עובדת עם מערך בגודל SIZE אבל צריכה לעבוד עם גודל התוכן שנדרש לפצח אותו
+הבייטים במערך יכולים להיות 0 סתם ככה בכל מקום במערך ולא ברור למה עצרת את הלולאה במקרה זה
+
+
+לא ברור למה ל- Map יש Integer
+זה אמור להיות פשוט אוסף של מילים
+וחבל שלא השתמש בsplit פשוט
+
+הקוד פשוט לא עובד מכמה סיבות שונות
+
+דוגמא לבדיקה
+map.put("and", 1);
+        map.put("is", 1);
+        map.put("this", 1);
+        map.put("you", 1);
+        String str = "this is an encrypted text and you should decrypt it";
+        int key = 13;
+        byte[] bytes = str.getBytes();
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] += key;
+        }
+        DecryptionThread decryptionThread =
+                new DecryptionThread(map, bytes, (byte) 0, (byte) 256, new FindIndexListener() {
+                    @Override
+                    public void find(byte index) {
+                        System.out.println(index);
+                    }
+                });
+        decryptionThread.start();
+
+        try {
+            decryptionThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+תבדקי בבקשה למה זה לא עובד
+יש כמה דברים קטנים נוספים אז קודם חשוב להסדיר את העניין הכללי אחרת אין טעם לרדת לענייני ביצועים וכדומה
+אחרת הציון על סמך מה שכן ראיתי הוא
+80.
+
+
+ערכתי מחדש
+        map.put("and", 1);
+        map.put("is", 1);
+        map.put("this", 1);
+        map.put("you", 1);
+        String str = "this is an encrypted text and you should decrypt it";
+        byte key = 13;
+        byte[] bytes=new byte[SIZE];
+        //הthread בודק גודל מסוים בתוך כל הקובץ-(SIZE)
+        for (int i = 0; i < str.length(); i++) {
+            bytes[i] = (byte) (str.getBytes()[i]+key);
+            //put int instead of byte
+        }
+        //0=256
+        DecryptionThread decryptionThread =
+                new DecryptionThread(map, bytes, (byte) 0, (byte) 255, new FindIndexListener() {
+                    @Override
+                    public void find(byte index) {
+                        System.out.println(index);
+                    }
+                });
+        decryptionThread.start();
+
+        try {
+            decryptionThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+
