@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+        var messages = [];
+        function renderMessages() {
+            var str = "";
+            for(var i=0;i<messages.length;i++){
+                str += messages[i] + "<br/>";
+            }
+            $("#divMessages").html(str);
+        }
+        function getMessages() {
+            $.get("/MainServlet?action=check&from="+messages.length, function (data, status) {
+                if(status == "success"){
+                    if(data.length > 0){
+                        var newMessages = data.split("&");
+                        for(var i=0;i<newMessages.length;i++)
+                            messages.push(newMessages[i]);
+                        renderMessages();
+                    }
+                }
+            });
+            setTimeout(function () {
+                getMessages();
+            }, 200);
+        }
+        function init() {
+            getMessages();
+        }
+        function btnSend() {
+            var msg = $("#txtMessage").val();
+            //TODO: disable the button
+            if(msg.length == 0)
+                return;
+            $.get("/MainServlet?action=send&message=" + msg, function (data, status) {
+                //TODO: enable the button
+                if(status=="success"){
+                    if(data == "ok"){
+                        $("#txtMessage").val("");
+                        $("#lblResult").val("send");
+                    }else{
+                        $("#lblResult").val("error");
+                    }
+                }else{
+                    $("#lblResult").val("error");
+                }
+            });
+        }
+    </script>
+</head>
+<body onload="init()">
+<div id="divMessages"></div>
+<input type="text" id="txtMessage">
+<button id="btnSend" onclick="btnSend()">Send</button>
+<span id="lblResult"></span>
+</body>
+</html>
