@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+        var arr = [];
+        function func(action) {
+            var message=null;
+            message=$("#textBox").val();
+            $.get("/MainServlet?message=" +message+ "&action=" + action, function (data, status) {
+                if (status == "success") {
+                    $("#result").html(status);
+                    $("#textBox").val("");
+                    arr.push(message);
+                }
+
+            });
+        }
+        function funcRead(action) {
+            var message=$("#textBox").val();
+            $.get("/MainServlet?message=" + message + "&action=" + action, function (data, status) {
+                if (status == "success") {
+                    if (data.length > 0)
+                        $("#result").html(decodeURI(data));
+
+                }
+
+            });
+        }
+
+
+    </script>
+
+</head>
+<body>
+<label>please enter a message</label>
+<input type="text" id="textBox" >
+<input type="button" value="send" id="send" onclick="func('send')">
+
+<br/>
+<br/>
+<input type="button" value="read a message" id="read" onclick="funcRead('read')">
+
+<br/>
+<br/>
+<div id="result"></div>
+
+</body>
+</html>
+
+
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chat</title>
+<script src="jquery-3.2.1.min.js"></script>
+<script>
+function func(action) {
+var message=null;
+message=$("#textBox").val();
+$.get("/MainServlet?message=" +message+ "&action=" + action, function (data, status) {
+if (status == "success") {
+$("#result").html(status);
+$("#textBox").val("");
+}
+
+});
+}
+function funcRead(action) {
+var message=$("#textBox").val();
+$.get("/MainServlet?message=" + message + "&action=" + action, function (data, status) {
+if (status == "success") {
+if (data.length > 0)
+$("#result").html(decodeURI(data));
+
+}
+
+});
+}
+
+
+</script>
+
+</head>
+<body>
+<label>please enter a message</label>
+<input type="text" id="textBox" >
+<input type="button" value="send" id="send" onclick="func('send')">
+
+<br/>
+<br/>
+<input type="button" value="read a message" id="read" onclick="funcRead('read')">
+
+<br/>
+<br/>
+<div id="result"></div>
+
+
+
+
+</body>
+</html>‏
+שרי • 6 דקות
+
+
+-->
